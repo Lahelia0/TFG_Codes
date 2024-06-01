@@ -5,8 +5,6 @@ import math
 import random
 from numpy import *
 
-#Function, coming from the functools packet,that given a function gives back the function
-#computed in one of the variables of the function
 #Funcion que dada una funcion nos devuelve dicha funcion computada
 #en una de las variables de la funcion.
 
