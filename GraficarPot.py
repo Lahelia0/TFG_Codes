@@ -34,10 +34,17 @@ sigma_opt, b_opt, c_opt = popt
 perr = numpy.sqrt(numpy.diag(pcov))
 sigma_err, b_err, c_err = perr
 
+Vr_fit = func(rad_test, *popt)
+
+# Calcular R^2
+ss_res = numpy.sum((V_lsq - Vr_fit) ** 2)
+ss_tot = numpy.sum((V_lsq - numpy.mean(V_lsq)) ** 2)
+r_squared = 1 - (ss_res / ss_tot)
+
 print("sigma_opt:", sigma_opt, "±", sigma_err)
 print("b_opt:", b_opt, "±", b_err)
 print("c_opt:", c_opt, "±", c_err)
-
+print("R^2:", r_squared)
 
 
 fig, ax = plt.subplots()
