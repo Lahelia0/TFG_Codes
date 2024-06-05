@@ -162,6 +162,85 @@ def Gamma_improved(U,mi,x,y,z,t):
                                     dot(U[xm_mi_m_ni,ym_mi_m_ni,zm_mi_m_ni,tm_mi_m_ni,ni],U[xm_mi,ym_mi,zm_mi,tm_mi,mi])))
     return gamma_imp.copy()
 
+#Computar el Wilson loop a x a para cada punto, haciendo uso de U.
+#Usando algoritmo del tipo Metropolis
+#input:-U: variables de enlace
+#      -x,y,z,t:posiciones
+#inner parameters:-N:numero de puntos en la lattice
+def compute_WL(U,x,y,z,t):
+    N=8
+    WL = 0.
+    incmi=zeros((4),'int')
+    incni=zeros((4),'int')
+    for mi in range(0,4):
+        incmi[mi]=1 
+        #siguiente punto de mi
+        xp_mi=(x+incmi[0].copy())%N
+        yp_mi=(y+incmi[1].copy())%N
+        zp_mi=(z+incmi[2].copy())%N
+        tp_mi=(t+incmi[3].copy())%N
+        for ni in range(0,mi):
+            incni[ni]=1 
+            #siguiente punto de ni
+            xp_ni=(x+incni[0].copy())%N
+            yp_ni=(y+incni[1].copy())%N
+            zp_ni=(z+incni[2].copy())%N
+            tp_ni=(t+incni[3].copy())%N
+            incni[ni]=0
+
+            WL=WL+trace(dot(U[x,y,z,t,mi],
+                        dot(dot(U[xp_mi,yp_mi,zp_mi,tp_mi,ni],
+                        dagger(U[xp_ni,yp_ni,zp_ni,tp_ni,mi])),
+                        dagger(U[x,y,z,t,ni]))))
+        incmi[mi]=0
+    return real(WL)/(3.*6.)
+
+#Computar el Wilson loop a x 2a para cada punto, haciendo uso de U.
+#Usando algoritmo del tipo Metropolis
+#input:-U: variables de enlace
+#      -x,y,z,t:posiciones
+#inner parameters:-N:numero de puntos en la lattice
+def compute_WLax2a(U,x,y,z,t):
+    N=8
+    WL = 0.
+    incmi=zeros((4),'int')
+    incni=zeros((4),'int')
+    for mi in range(0,4):
+        incmi[mi]=1 
+        #siguiente punto de mi
+        xp_mi=(x+incmi[0].copy())%N
+        yp_mi=(y+incmi[1].copy())%N
+        zp_mi=(z+incmi[2].copy())%N
+        tp_mi=(t+incmi[3].copy())%N
+        for ni in range(3,mi,-1):
+            if ni!=mi :
+                incni[ni]=1 
+                #siguiente punto de ni
+                xp_ni=(x+incni[0].copy())%N
+                yp_ni=(y+incni[1].copy())%N
+                zp_ni=(z+incni[2].copy())%N
+                tp_ni=(t+incni[3].copy())%N
+                #siguiente punto de ni y mi
+                xp_mi_p_ni=(x+incmi[0].copy()+incni[0].copy())%N
+                yp_mi_p_ni=(y+incmi[1].copy()+incni[1].copy())%N
+                zp_mi_p_ni=(z+incmi[2].copy()+incni[2].copy())%N
+                tp_mi_p_ni=(t+incmi[3].copy()+incni[3].copy())%N
+                #siguiente punto de 2ni
+                xp_2ni=(x+2*incni[0].copy())%N
+                yp_2ni=(y+2*incni[1].copy())%N
+                zp_2ni=(z+2*incni[2].copy())%N
+                tp_2ni=(t+2*incni[3].copy())%N
+                incni[ni]=0
+                WL=WL+trace(dot(U[x,y,z,t,mi],\
+                    dot(dot(U[xp_mi,yp_mi,zp_mi,tp_mi,ni],
+                    U[xp_mi_p_ni,yp_mi_p_ni,zp_mi_p_ni,tp_mi_p_ni,ni]),\
+                    dot(dagger(U[xp_2ni,yp_2ni,zp_2ni,tp_2ni,mi]),\
+                    dot(dagger(U[xp_ni,yp_ni,zp_ni,tp_ni,ni]),
+                    dagger(U[x,y,z,t,ni]))))))
+
+        incmi[mi]=0
+    return real(WL)/(3.*6.)
+
 #computar la derivada del gauge covariante para todos los puntos y direcciones.
 #input:-U:variables de enlace
 #inner parameters:-u0: valor medio de U (Tadpole improvement)
